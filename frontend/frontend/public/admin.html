@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard | Attendance System</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 235px;
+    background: #0f172a;
+    color: white;
+    padding: 25px 15px;
+    flex-shrink: 0;
+}
+
+.brand {
+    font-size: 19px;
+    font-weight: bold;
+    padding: 5px 10px 30px;
+    line-height: 1.5;
+}
+
+.brand span {
+    color: #60a5fa;
+}
+
+.menu-label {
+    color: #94a3b8;
+    font-size: 11px;
+    padding: 10px;
+    letter-spacing: 1px;
+}
+
+.menu a {
+    display: block;
+    color: #cbd5e1;
+    text-decoration: none;
+    padding: 13px 12px;
+    margin-bottom: 7px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.menu a.active,
+.menu a:hover {
+    background: #2563eb;
+    color: white;
+}
+
+.main {
+    flex: 1;
+    min-width: 0;
+    padding: 28px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.topbar h1 {
+    font-size: 25px;
+}
+
+.topbar p {
+    color: #64748b;
+    font-size: 13px;
+    margin-top: 7px;
+}
+
+.admin-badge {
+    background: #dbeafe;
+    color: #1d4ed8;
+    padding: 11px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.section-title {
+    font-size: 18px;
+    margin-bottom: 18px;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: white;
+    padding: 22px 18px;
+    border-radius: 13px;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+    border: 1px solid #e2e8f0;
+}
+
+.card-icon {
+    font-size: 23px;
+    margin-bottom: 16px;
+}
+
+.card p {
+    color: #64748b;
+    font-size: 13px;
+    margin-bottom: 10px;
+}
+
+.card h2 {
+    font-size: 28px;
+}
+
+.blue { border-top: 4px solid #3b82f6; }
+.green { border-top: 4px solid #22c55e; }
+.red { border-top: 4px solid #ef4444; }
+.purple { border-top: 4px solid #a855f7; }
+
+.panel {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 13px;
+    padding: 22px;
+    margin-bottom: 25px;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.panel-header h2 {
+    font-size: 18px;
+}
+
+.primary-btn {
+    display: inline-block;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    padding: 11px 15px;
+    border-radius: 8px;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 500px;
+}
+
+th {
+    text-align: left;
+    color: #64748b;
+    background: #f8fafc;
+    font-size: 12px;
+    padding: 14px 12px;
+}
+
+td {
+    padding: 16px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 13px;
+}
+
+.status {
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.present {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.absent {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.notice {
+    background: #eff6ff;
+    color: #1e40af;
+    padding: 15px;
+    border-radius: 9px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.logout {
+    margin-top: 25px;
+}
+
+.logout a {
+    display: block;
+    text-align: center;
+    padding: 12px;
+    background: #334155;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+}
+
+@media (max-width: 950px) {
+    .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .sidebar {
+        width: 190px;
+    }
+
+    .main {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 600px) {
+    .layout {
+        display: block;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .brand {
+        padding: 5px 5px 15px;
+    }
+
+    .menu {
+        display: flex;
+        overflow-x: auto;
+        gap: 5px;
+    }
+
+    .menu-label {
+        display: none;
+    }
+
+    .menu a {
+        white-space: nowrap;
+        margin: 0;
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .logout {
+        display: none;
+    }
+
+    .main {
+        padding: 18px 12px;
+    }
+
+    .topbar h1 {
+        font-size: 21px;
+    }
+
+    .admin-badge {
+        padding: 9px;
+        font-size: 11px;
+    }
+
+    .cards {
+        gap: 10px;
+    }
+
+    .card {
+        padding: 16px 12px;
+    }
+
+    .card h2 {
+        font-size: 24px;
+    }
+
+    .panel {
+        padding: 14px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="layout">
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            🎓 Attend<span>Ease</span>
+        </div>
+
+        <div class="menu-label">MAIN MENU</div>
+
+        <nav class="menu">
+            <a href="admin.html" class="active">▦ Dashboard</a>
+            <a href="attendance.html">✓ Mark Attendance</a>
+            <a href="students.html">♙ Students</a>
+            <a href="reports.html">▤ Reports</a>
+        </nav>
+
+        <div class="logout">
+            <a href="index.html">↪ Logout</a>
+        </div>
+
+    </aside>
+
+    <main class="main">
+
+        <header class="topbar">
+            <div>
+                <h1>Admin Dashboard</h1>
+                <p>Welcome back! Here's your attendance overview.</p>
+            </div>
+
+            <div class="admin-badge">👤 Administrator</div>
+        </header>
+
+        <h2 class="section-title">Today's Overview</h2>
+
+        <section class="cards">
+
+            <div class="card blue">
+                <div class="card-icon">👨‍🎓</div>
+                <p>Total Students</p>
+                <h2>120</h2>
+            </div>
+
+            <div class="card green">
+                <div class="card-icon">✓</div>
+                <p>Present Today</p>
+                <h2>96</h2>
+            </div>
+
+            <div class="card red">
+                <div class="card-icon">✕</div>
+                <p>Absent Today</p>
+                <h2>24</h2>
+            </div>
+
+            <div class="card purple">
+                <div class="card-icon">▤</div>
+                <p>Attendance Rate</p>
+                <h2>80%</h2>
+            </div>
+
+        </section>
+
+        <section class="panel">
+
+            <div class="panel-header">
+                <h2>Recent Attendance</h2>
+
+                <a class="primary-btn" href="attendance.html">
+                    + Mark Attendance
+                </a>
+            </div>
+
+            <div class="table-wrap">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>STUDENT ID</th>
+                            <th>STUDENT NAME</th>
+                            <th>DATE</th>
+                            <th>STATUS</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>STU001</td>
+                            <td>Arun Kumar</td>
+                            <td>Today</td>
+                            <td><span class="status present">Present</span></td>
+                        </tr>
+
+                        <tr>
+                            <td>STU002</td>
+                            <td>Rahim Ahmed</td>
+                            <td>Today</td>
+                            <td><span class="status absent">Absent</span></td>
+                        </tr>
+
+                        <tr>
+                            <td>STU003</td>
+                            <td>Kavin Raj</td>
+                            <td>Today</td>
+                            <td><span class="status present">Present</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+
+        </section>
+
+        <div class="notice">
+            <strong>📌 Admin Reminder</strong><br>
+            Please mark attendance for the current date and save the records.
+            Students can view their attendance but cannot mark it themselves.
+        </div>
+
+    </main>
+
+</div>
+<script>
+    window.addEventListener("DOMContentLoaded", async () => {
+        try {
+            const response = await fetch('http://localhost:5000/api/attendance/records');
+            const records = await response.json();
+
+            if (response.ok) {
+                const tableBody = document.getElementById("attendanceTableBody");
+                if (tableBody) {
+                    tableBody.innerHTML = ""; 
+
+                    if (records.length === 0) {
+                        tableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 20px;">No records found.</td></tr>`;
+                        return;
+                    }
+
+                    records.forEach(record => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${record.id}</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${record.user_id}</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #15803d; font-weight: bold;">${record.status}</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${new Date(record.timestamp).toLocaleString()}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                }
+            }
+        } catch (err) {
+            console.error("Failed to load records:", err);
+        }
+    });
+</script>
+</body>
+</html>
