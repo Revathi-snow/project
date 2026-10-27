@@ -1,216 +1,133 @@
-import { useState } from 'react';
-import heroImg from './assets/hero.png';
-import reactLogo from './assets/react.svg';
-import viteLogo from './assets/vite.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
 
-function App() {
-  const [count, setCount] = useState(0);
-  const [role, setRole] = useState("student");
-  const [userId, setUserId] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
-  const [success, setSuccess] = useState(false);
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [role, setRole] = useState('student');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
 
-  // New states for location attendance check-in
-  const [attendanceLoading, setAttendanceLoading] = useState(false);
-  const [attendanceMessage, setAttendanceMessage] = useState("");
-  const [attendanceError, setAttendanceError] = useState("");
-
-  function handleLogin(event) {
-    event.preventDefault();
-    const id = userId.trim().toUpperCase();
- console.log("Logging in with Role:", role, "ID:", id, "Password:", password);
-    if (
-      role === "admin" &&
-      id === "ADMIN001" &&
-      password === "Admin123"
-    ) {
-      setSuccess(true);
-      setMessage("Admin login successful!");
-       setTimeout(() => {
-        window.location.href = './admin.html';
-      }, 500);
-      return;
-    }  else if (
-      role === "student" &&
-      id === "STU001" &&
-      password === "Student123"
-    ) {
-      setSuccess(true);
-      setMessage("Student login successful!");
-    } else {
-      setSuccess(false);
-      setMessage("Invalid User ID, password, or selected role.");
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
     }
-  }
+  }, []);
 
-  // Geolocation & Attendance API call function
-  const handleMarkAttendance = () => {
-    setAttendanceLoading(true);
-    setAttendanceMessage("");
-    setAttendanceError("");
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setMessage('Logging in...');
 
-    if (!navigator.geolocation) {
-      setAttendanceError("Geolocation is not supported by your browser.");
-      setAttendanceLoading(false);
-      return;
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Invalid email or password.');
+
+     // Check if the selected login role matches the user's actual role in the database
+      if (data.user.role.toLowerCase() !== role.toLowerCase()) {
+        throw new Error(`Access denied. You are not registered as a ${role}.`);
+      }
+
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      if (data.user.role.toLowerCase() === 'admin') {
+        window.location.href = '/admin.html';
+      } else if (data.user.role.toLowerCase() === 'student') {
+        window.location.href = '/student.html';
+      } else {
+        setUser(data.user);
+      }
+    } catch (err) {
+      setMessage(err.message);
     }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-
-        try {
-          const response = await fetch('http://localhost:5000/api/attendance/mark', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              userId: 1, // Maps to your database user record ID
-              locationId: 1, // Target building/office location ID
-              latitude,
-              longitude,
-            }),
-          });
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            throw new Error(data.error || 'Failed to mark attendance.');
-          }
-
-          setAttendanceMessage(data.message);
-        } catch (err) {
-          setAttendanceError(err.message);
-        } finally {
-          setAttendanceLoading(false);
-        }
-      },
-      () => {
-        setAttendanceError("Unable to retrieve your location. Please enable GPS permissions.");
-        setAttendanceLoading(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
   };
 
   return (
-    <main className="login-container">
-      <section className="login-container">
-        
-        {/* Conditional Rendering: If logged in successfully as a Student */}
-        {success && role === "student" ? (
-          <div className="dashboard-container" style={{ textAlign: 'center', padding: '20px' }}>
-            <h2>Welcome, {userId}</h2>
-            <p style={{ color: '#15803d', fontWeight: 'bold' }}>{message}</p>
-            <p>Click below to verify your location and mark your attendance for today.</p>
+    <div style={styles.body}>
+      <main style={styles.loginContainer}>
+        <div style={styles.logo}>🎓</div>
+        <h1 style={styles.h1}>Welcome Back!</h1>
+        <p style={styles.subtitle}>Student Attendance<br />Management System</p>
 
-            <button
-              onClick={handleMarkAttendance}
-              disabled={attendanceLoading}
-              className="login-btn"
-              style={{ marginTop: '20px', cursor: 'pointer' }}
-            >
-              {attendanceLoading ? "Verifying GPS Location..." : "Mark Attendance 📍"}
-            </button>
+        <form onSubmit={handleLogin}>
+          <label style={styles.label}>Login As</label>
+          <select value={role} onChange={(e) => setRole(e.target.value)} style={styles.input}>
+            <option value="student">Student</option>
+            <option value="admin">Admin</option>
+          </select>
 
-            {attendanceMessage && (
-              <p style={{ color: "#15803d", marginTop: "15px", fontWeight: "bold" }}>
-                {attendanceMessage}
-              </p>
-            )}
-            {attendanceError && (
-              <p style={{ color: "#b91c1c", marginTop: "15px", fontWeight: "bold" }}>
-                Error: {attendanceError}
-              </p>
-            )}
+          <label style={styles.label}>Email</label>
+          <input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={styles.input}
+            required
+          />
 
-            <button
-              onClick={() => { setSuccess(false); setUserId(""); setPassword(""); }}
-              style={{ marginTop: '30px', background: 'none', border: 'none', color: '#0066cc', cursor: 'pointer', textDecoration: 'underline' }}
-            >
-              Sign Out
-            </button>
-          </div>
-        ) : success && role === "admin" ? (
-          // Admin View after successful login
-          <div style={{ textAlign: 'center', padding: '20px' }}>
-            <h2>Admin Dashboard</h2>
-            <p style={{ color: '#15803d', fontWeight: 'bold' }}>{message}</p>
-            <button
-              onClick={() => { setSuccess(false); setUserId(""); setPassword(""); }}
-              style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}
-            >
-              Sign Out
-            </button>
-          </div>
-        ) : (
-          // Default Login Form View
-          <>
-            <div className="logo">🎓</div>
-            <h1>Welcome Back!</h1>
-            <p className="subtitle">
-              Student Attendance<br />
-              Management System
-            </p>
+          <label style={styles.label}>Password</label>
+          <input
+            type="password"
+            placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={styles.input}
+            required
+          />
 
-            <form id="loginForm" onSubmit={handleLogin}>
-              <label htmlFor="role">Login As</label>
-              <select
-                id="role"
-                value={role}
-                onChange={(event) => setRole(event.target.value)}
-                required
-              >
-                <option value="student">Student</option>
-                <option value="admin">Admin</option>
-              </select>
-
-              <label htmlFor="userId">User ID</label>
-              <input
-                type="text"
-                id="userId"
-                placeholder="Enter your User ID"
-                autoComplete="username"
-                value={userId}
-                onChange={(event) => setUserId(event.target.value)}
-                required
-              />
-
-              <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                id="password"
-                placeholder="Enter your password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-              />
-
-              <button type="submit" className="login-btn">
-                Sign In &rarr;
-              </button>
-
-              <p
-                id="message"
-                role="status"
-                style={{ color: success ? "#15803d" : "#b91c1c" }}
-              >
-                {message}
-              </p>
-            </form>
-          </>
-        )}
-
-        <div className="footer">
-          Student Attendance Management System
-        </div>
-      </section>
-    </main>
+          <button type="submit" style={styles.loginBtn}>Sign In →</button>
+          {message && <p style={styles.message}>{message}</p>}
+        </form>
+      </main>
+    </div>
   );
 }
 
-export default App;
+const styles = {
+  body: {
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '20px',
+    background: 'linear-gradient(135deg, #0f172a, #1d4ed8)',
+    boxSizing: 'border-box',
+    fontFamily: 'Arial, sans-serif',
+    width: '100vw',
+    margin: 0,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+  },
+  loginContainer: {
+    width: '100%',
+    maxWidth: '420px',
+    background: '#fff',
+    padding: '35px 28px',
+    borderRadius: '20px',
+    boxShadow: '0 20px 50px rgba(0, 0, 0, 0.25)',
+  },
+  logo: {
+    width: '70px',
+    height: '70px',
+    margin: '0 auto 18px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: '#dbeafe',
+    borderRadius: '20px',
+    fontSize: '35px',
+  },
+  h1: { color: '#0f172a', fontSize: '25px', textAlign: 'center', marginBottom: '8px' },
+  subtitle: { textAlign: 'center', color: '#64748b', fontSize: '14px', marginBottom: '28px' },
+  label: { display: 'block', color: '#334155', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' },
+  input: { width: '100%', padding: '14px', border: '1px solid #cbd5e1', borderRadius: '10px', marginBottom: '20px', background: '#f8fafc', fontSize: '15px', boxSizing: 'border-box' },
+  loginBtn: { width: '100%', padding: '15px', border: 'none', borderRadius: '10px', background: '#2563eb', color: 'white', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' },
+  message: { textAlign: 'center', fontSize: '14px', marginTop: '15px', color: '#b91c1c' },
+};

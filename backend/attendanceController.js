@@ -65,3 +65,19 @@ exports.getAllAttendance = async (req, res) => {
     res.status(500).json({ error: 'Server error while fetching records.' });
   }
 };
+// Controller function to get all attendance records for the admin dashboard
+exports.getAttendance = async (req, res) => {
+  try {
+    const query = `
+      SELECT a.attendance_id, a.student_id, u.name as student_name, a.attendance_date, a.check_in_time, a.status 
+      FROM attendance a
+      JOIN users u ON a.student_id = u.user_id
+      ORDER BY a.check_in_time DESC;
+    `;
+    const result = await db.query(query);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'Server Error' });
+  }
+};

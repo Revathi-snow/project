@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Dashboard | AttendEase</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-main: #f3f4f6;
+      --sidebar-bg: #102a43;
+      --sidebar-active: #1d70b8;
+      --text-dark: #1f2937;
+      --text-muted: #6b7280;
+      --card-bg: #ffffff;
+      --border-color: #e5e7eb;
+      --border-blue: #3b82f6;
+      --border-green: #10b981;
+      --border-red: #ef4444;
+      --border-purple: #8b5cf6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      display: flex;
+      min-height: 100vh;
+      color: var(--text-dark);
+    }
+
+    /* --- Sidebar --- */
+    .sidebar {
+      width: 260px;
+      background-color: var(--sidebar-bg);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 30px;
+      color: #ffffff;
+    }
+
+    .brand-icon {
+      width: 26px;
+      height: 26px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .menu-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 12px;
+      padding-left: 8px;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex-grow: 1;
+    }
+
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 8px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .nav-item a svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .nav-item.active a,
+    .nav-item a:hover {
+      background-color: var(--sidebar-active);
+      color: #ffffff;
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background-color: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      margin-top: auto;
+      transition: background 0.2s;
+      width: 100%;
+    }
+
+    .logout-btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .logout-btn:hover {
+      background-color: rgba(239, 68, 68, 0.85);
+      border-color: transparent;
+    }
+
+    /* --- Main Layout Wrapper --- */
+    .main-wrapper {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #ffffff;
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-left h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .header-left p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .user-profile-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-dark);
+      font-size: 13px;
+      font-weight: 600;
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    .content {
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* --- Overview Cards --- */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 1024px) {
+      .overview-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 20px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      position: relative;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+
+    .card.blue::before { background-color: var(--border-blue); }
+    .card.green::before { background-color: var(--border-green); }
+    .card.red::before { background-color: var(--border-red); }
+    .card.purple::before { background-color: var(--border-purple); }
+
+    .card-title {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .card-value {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    /* --- Data Table Container --- */
+    .section-container {
+      background: var(--card-bg);
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      padding: 24px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      font-size: 12px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    td {
+      padding: 14px 16px;
+      font-size: 14px;
+      border-bottom: 1px solid #f3f4f6;
+      color: var(--text-dark);
+    }
+
+    .empty-message {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 35px;
+      font-size: 14px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-present {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-absent {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+
+    .student-reminder {
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar with Exact Matching Icons -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-icon">⚡</span>
+      <span>AttendEase</span>
+    </div>
+    
+    <div class="menu-title">Main Menu</div>
+    <ul class="nav-list">
+      <li class="nav-item active">
+        <a href="#">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Mark Attendance
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/studentprofile.html">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Student Profile Update
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Profile
+        </a>
+      </li>
+    </ul>
+
+    <button class="logout-btn" onclick="handleLogout()">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
+    </button>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="main-wrapper">
+    <header>
+      <div class="header-left">
+        <h1>Student Dashboard</h1>
+        <p>Welcome back! Here is your attendance overview</p>
+      </div>
+      <div class="user-profile-badge">
+        👤 <span id="student-name-badge">Loading..</span>
+      </div>
+    </header>
+
+    <main class="content">
+      <!-- 4 Summary Metric Cards -->
+      <div class="overview-grid">
+        <div class="card blue">
+          <div class="card-title">Total Sessions</div>
+          <div class="card-value" id="val-total-classes">—</div>
+        </div>
+        <div class="card green">
+          <div class="card-title">Classes Attended</div>
+          <div class="card-value" id="val-present-days">—</div>
+        </div>
+        <div class="card red">
+          <div class="card-title">Classes Missed</div>
+          <div class="card-value" id="val-absent-days">—</div>
+        </div>
+        <div class="card purple">
+          <div class="card-title">Attendance Rate</div>
+          <div class="card-value" id="val-attendance-rate">—</div>
+        </div>
+      </div>
+
+      <!-- Live Attendance Records Table -->
+      <section class="section-container">
+        <div class="section-header">
+          <h2 class="section-title">My Recent Attendance Records</h2>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Subject / Session</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="attendance-tbody">
+              <tr>
+                <td colspan="3" class="empty-message">Fetching attendance records from database...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="student-reminder">
+        📌 <span><strong>Note:</strong> Attendance records are synced directly from your PostgreSQL database.</span>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // 1. Session verification check matching React localStorage format
+    const storedUserRaw = localStorage.getItem('user');
+    let user = null;
+
+    if (storedUserRaw) {
+      try {
+        user = JSON.parse(storedUserRaw);
+      } catch (e) {
+        console.error("Failed to parse stored user", e);
+      }
+    }
+
+    // Redirect to login if user isn't logged in or isn't a student
+    if (!user || !user.role || user.role.toLowerCase() !== 'student') {
+      window.location.href = '/';
+    }
+
+    async function loadStudentDashboard() {
+      const storedUserRaw = localStorage.getItem('user');
+      let user = null;
+
+      if (storedUserRaw) {
+        try {
+          user = JSON.parse(storedUserRaw);
+        } catch (e) {
+          console.error("Failed to parse stored user", e);
+        }
+      }
+
+      // Redirect if not logged in or not a student
+      if (!user || !user.role || user.role.toLowerCase() !== 'student') {
+        window.location.href = '/';
+        return;
+      }
+
+      // Safely check all possible ID keys stored by your login route
+      const studentId = user.user_id || user.id || user.userId;
+
+      if (!studentId) {
+        console.error("User object found in localStorage, but no ID property exists:", user);
+        alert("Session error: User ID not found. Please log out and log back in.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:5000/api/student/attendance/${studentId}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch student data');
+        }
+
+        const data = await response.json();
+
+        // Update User Profile Badge Name
+        document.getElementById('student-name-badge').textContent = 
+          data.studentName || user.name || `Student (${studentId})`;
+
+        // Populate Summary Cards
+        document.getElementById('val-total-classes').textContent = data.summary?.totalClasses ?? '0';
+        document.getElementById('val-present-days').textContent = data.summary?.presentDays ?? '0';
+        document.getElementById('val-absent-days').textContent = data.summary?.absentDays ?? '0';
+        document.getElementById('val-attendance-rate').textContent = data.summary?.attendanceRate 
+          ? `${data.summary.attendanceRate}%` 
+          : '0%';
+
+        // Populate Table Rows
+        const tbody = document.getElementById('attendance-tbody');
+        tbody.innerHTML = '';
+
+        if (!data.records || data.records.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" class="empty-message">No attendance records to display</td></tr>';
+          return;
+        }
+
+        data.records.forEach(record => {
+          const tr = document.createElement('tr');
+          const isPresent = record.status && record.status.toLowerCase() === 'present';
+
+          tr.innerHTML = `
+            <td>${record.date}</td>
+            <td>${record.subject || 'General Attendance'}</td>
+            <td>
+              <span class="status-badge ${isPresent ? 'status-present' : 'status-absent'}">
+                ${record.status}
+              </span>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+      } catch (err) {
+        console.error("Error loading dashboard:", err);
+        document.getElementById('attendance-tbody').innerHTML = 
+          '<tr><td colspan="3" class="empty-message">No attendance records found or backend offline.</td></tr>';
+      }
+    }
+
+    // 3. Handle Logout
+    function handleLogout() {
+      localStorage.removeItem('user');
+      window.location.href = '/';
+    }
+
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', loadStudentDashboard);
+  </script>
+</body>
+</html>

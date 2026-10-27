@@ -23,6 +23,7 @@ body {
     min-height: 100vh;
 }
 
+/* Sidebar */
 .sidebar {
     width: 235px;
     background: #0f172a;
@@ -65,6 +66,21 @@ body {
     color: white;
 }
 
+.logout {
+    margin-top: 25px;
+}
+
+.logout a {
+    display: block;
+    text-align: center;
+    padding: 12px;
+    background: #334155;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+}
+
+/* Main content */
 .main {
     flex: 1;
     min-width: 0;
@@ -103,6 +119,7 @@ body {
     margin-bottom: 18px;
 }
 
+/* Dashboard cards */
 .cards {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -133,11 +150,23 @@ body {
     font-size: 28px;
 }
 
-.blue { border-top: 4px solid #3b82f6; }
-.green { border-top: 4px solid #22c55e; }
-.red { border-top: 4px solid #ef4444; }
-.purple { border-top: 4px solid #a855f7; }
+.blue {
+    border-top: 4px solid #3b82f6;
+}
 
+.green {
+    border-top: 4px solid #22c55e;
+}
+
+.red {
+    border-top: 4px solid #ef4444;
+}
+
+.purple {
+    border-top: 4px solid #a855f7;
+}
+
+/* Content panels */
 .panel {
     background: white;
     border: 1px solid #e2e8f0;
@@ -195,23 +224,6 @@ td {
     font-size: 13px;
 }
 
-.status {
-    padding: 6px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.present {
-    background: #dcfce7;
-    color: #15803d;
-}
-
-.absent {
-    background: #fee2e2;
-    color: #b91c1c;
-}
-
 .notice {
     background: #eff6ff;
     color: #1e40af;
@@ -221,20 +233,7 @@ td {
     line-height: 1.6;
 }
 
-.logout {
-    margin-top: 25px;
-}
-
-.logout a {
-    display: block;
-    text-align: center;
-    padding: 12px;
-    background: #334155;
-    color: white;
-    border-radius: 8px;
-    text-decoration: none;
-}
-
+/* Responsive design */
 @media (max-width: 950px) {
     .cards {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -320,6 +319,7 @@ td {
 
 <div class="layout">
 
+    <!-- Sidebar -->
     <aside class="sidebar">
 
         <div class="brand">
@@ -331,7 +331,8 @@ td {
         <nav class="menu">
             <a href="admin.html" class="active">▦ Dashboard</a>
             <a href="attendance.html">✓ Mark Attendance</a>
-            <a href="students.html">♙ Students</a>
+            <a href="student-profile.html">♙ Student Profile Update</a>
+            <a href="employee-profile.html">♙ Employee Profile Update</a>
             <a href="reports.html">▤ Reports</a>
         </nav>
 
@@ -341,6 +342,7 @@ td {
 
     </aside>
 
+    <!-- Main dashboard -->
     <main class="main">
 
         <header class="topbar">
@@ -354,34 +356,36 @@ td {
 
         <h2 class="section-title">Today's Overview</h2>
 
+        <!-- Summary cards -->
         <section class="cards">
 
             <div class="card blue">
                 <div class="card-icon">👨‍🎓</div>
                 <p>Total Students</p>
-                <h2>120</h2>
+                <h2 id="totalStudents">-</h2>
             </div>
 
             <div class="card green">
                 <div class="card-icon">✓</div>
                 <p>Present Today</p>
-                <h2>96</h2>
+                <h2 id="presentToday">—</h2>
             </div>
 
             <div class="card red">
                 <div class="card-icon">✕</div>
                 <p>Absent Today</p>
-                <h2>24</h2>
+                <h2 id="absentToday">—</h2>
             </div>
 
             <div class="card purple">
                 <div class="card-icon">▤</div>
                 <p>Attendance Rate</p>
-                <h2>80%</h2>
+                <h2 id="attendanceRate">—</h2>
             </div>
 
         </section>
 
+        <!-- Recent attendance -->
         <section class="panel">
 
             <div class="panel-header">
@@ -404,26 +408,11 @@ td {
                         </tr>
                     </thead>
 
-                    <tbody>
+                    <tbody id="attendanceTableBody">
                         <tr>
-                            <td>STU001</td>
-                            <td>Arun Kumar</td>
-                            <td>Today</td>
-                            <td><span class="status present">Present</span></td>
-                        </tr>
-
-                        <tr>
-                            <td>STU002</td>
-                            <td>Rahim Ahmed</td>
-                            <td>Today</td>
-                            <td><span class="status absent">Absent</span></td>
-                        </tr>
-
-                        <tr>
-                            <td>STU003</td>
-                            <td>Kavin Raj</td>
-                            <td>Today</td>
-                            <td><span class="status present">Present</span></td>
+                            <td colspan="4" style="text-align:center; color:#64748b;">
+                                No attendance records to display.
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -432,6 +421,7 @@ td {
 
         </section>
 
+        <!-- Admin reminder -->
         <div class="notice">
             <strong>📌 Admin Reminder</strong><br>
             Please mark attendance for the current date and save the records.
@@ -442,37 +432,70 @@ td {
 
 </div>
 <script>
-    window.addEventListener("DOMContentLoaded", async () => {
-        try {
-            const response = await fetch('http://localhost:5000/api/attendance/records');
-            const records = await response.json();
+  async function fetchAttendanceData() {
+    try {
+      // Fetch data from your backend API
+      const response = await fetch('http://localhost:5000/api/attendance');
+      const data = await response.json();
 
-            if (response.ok) {
-                const tableBody = document.getElementById("attendanceTableBody");
-                if (tableBody) {
-                    tableBody.innerHTML = ""; 
+      if (!response.ok) throw new Error('Failed to fetch attendance');
 
-                    if (records.length === 0) {
-                        tableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 20px;">No records found.</td></tr>`;
-                        return;
-                    }
+      // 1. Calculate Summary Metrics
+      const totalCount = data.length;
+      const presentCount = data.filter(item => item.status.toLowerCase() === 'present').length;
+      const absentCount = data.filter(item => item.status.toLowerCase() === 'absent').length;
+      
+      // Calculate attendance percentage rate safely
+      const attendanceRate = totalCount > 0 ? Math.round((presentCount / totalCount) * 100) : 0;
 
-                    records.forEach(record => {
-                        const row = document.createElement("tr");
-                        row.innerHTML = `
-                            <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${record.id}</td>
-                            <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${record.user_id}</td>
-                            <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #15803d; font-weight: bold;">${record.status}</td>
-                            <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${new Date(record.timestamp).toLocaleString()}</td>
-                        `;
-                        tableBody.appendChild(row);
-                    });
-                }
-            }
-        } catch (err) {
-            console.error("Failed to load records:", err);
-        }
-    });
+      // Update the cards
+      document.getElementById('totalStudents').textContent = totalCount;
+      document.getElementById('presentToday').textContent = presentCount;
+      document.getElementById('absentToday').textContent = absentCount;
+      document.getElementById('attendanceRate').textContent = `${attendanceRate}%`;
+
+      // 2. Populate the Table
+      const tableBody = document.getElementById('attendanceTableBody');
+      tableBody.innerHTML = ''; // Clear fallback row
+
+      if (totalCount === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="4" style="text-align:center; color:#64748b;">
+              No attendance records to display.
+            </td>
+          </tr>`;
+        return;
+      }
+
+      data.forEach(record => {
+        const row = document.createElement('tr');
+        const formattedDate = new Date(record.attendance_date).toLocaleDateString();
+        
+        const statusBadgeStyle = record.status.toLowerCase() === 'present' 
+          ? 'background: #dcfce7; color: #15803d;' 
+          : 'background: #fee2e2; color: #b91c1c;';
+
+        row.innerHTML = `
+          <td>${record.student_id}</td>
+          <td style="font-weight: bold;">${record.student_name}</td>
+          <td>${formattedDate}</td>
+          <td>
+            <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; ${statusBadgeStyle}">
+              ${record.status.toUpperCase()}
+            </span>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+
+    } catch (err) {
+      console.error('Error loading dashboard attendance data:', err);
+    }
+  }
+
+  // Run automatically when the admin dashboard loads
+  window.addEventListener('DOMContentLoaded', fetchAttendanceData);
 </script>
 </body>
 </html>
